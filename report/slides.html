@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AutoEcoKG 2.0 Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  @page {
+    size: 1920px 1080px;
+    margin: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0f172a;
+    color: #1e293b;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .slide {
+    width: 1920px;
+    height: 1080px;
+    page-break-after: always;
+    position: relative;
+    background: #f8fafc;
+    padding: 60px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  /* Slide 1: Dark Title Slide */
+  .slide.title-slide {
+    background: radial-gradient(circle at 85% 15%, #1e293b 0%, #0f172a 100%);
+    color: #ffffff;
+    justify-content: center;
+    padding: 100px 120px;
+  }
+
+  .title-accent {
+    width: 100px;
+    height: 6px;
+    background: #0ea5e9;
+    border-radius: 3px;
+    margin-bottom: 28px;
+  }
+
+  .title-main {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    line-height: 1.15;
+  }
+
+  .title-sub {
+    font-size: 28px;
+    font-weight: 600;
+    color: #38bdf8;
+    margin-top: 14px;
+    line-height: 1.3;
+  }
+
+  .title-desc {
+    font-size: 20px;
+    color: #94a3b8;
+    margin-top: 20px;
+    max-width: 1200px;
+    line-height: 1.5;
+  }
+
+  .title-meta-box {
+    margin-top: 60px;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(8px);
+  }
+
+  .meta-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .meta-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .meta-value {
+    font-size: 17px;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  .meta-link {
+    color: #38bdf8;
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+  }
+
+  /* Slide Header */
+  .slide-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .section-tag {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #0284c7;
+  }
+
+  .slide-title {
+    font-size: 34px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+  }
+
+  .slide-subtitle {
+    font-size: 17px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  /* Grid Layouts */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin: 36px 0;
+    flex: 1;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 36px;
+    margin: 36px 0;
+    flex: 1;
+  }
+
+  /* Cards */
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-stripe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+  }
+
+  .stripe-blue { background: #0284c7; }
+  .stripe-cyan { background: #0ea5e9; }
+  .stripe-green { background: #10b981; }
+  .stripe-navy { background: #0f172a; }
+  .stripe-red { background: #ef4444; }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card-item {
+    font-size: 15.5px;
+    line-height: 1.5;
+    color: #475569;
+  }
+
+  .card-item strong {
+    color: #0f172a;
+    font-weight: 700;
+  }
+
+  .stat-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #e0f2fe;
+    color: #0369a1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 4px;
+  }
+
+  .stat-badge-green {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  /* Table styling */
+  table.slide-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    margin-top: 10px;
+  }
+
+  table.slide-table th {
+    background: #f1f5f9;
+    color: #334155;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 700;
+    border-bottom: 2px solid #cbd5e1;
+  }
+
+  table.slide-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569;
+  }
+
+  table.slide-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Slide Footer */
+  .slide-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 18px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 13.5px;
+    color: #64748b;
+  }
+
+  .slide-number {
+    font-weight: 700;
+    color: #0f172a;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+  <!-- SLIDE 1: Title Slide -->
+  <div class="slide title-slide">
+    <div class="title-accent"></div>
+    <div class="title-main">AutoEcoKG 2.0</div>
+    <div class="title-sub">Environmental Knowledge Graph for Real-World Automotive Compliance & Fleet Decision-Making</div>
+    <div class="title-desc">
+      A graph-native framework bridging official laboratory ratings, empirical ADAC EcoTest measurements,
+      Euro 7 non-exhaust particulates (Regulation EU 2024/1257), Catena-X Battery Passports (EU 2023/1542),
+      and 5-criterion Pareto Skyline Total Cost of Ownership optimization.
+    </div>
+
+    <div class="title-meta-box">
+      <div class="meta-col">
+        <span class="meta-label">Author</span>
+        <span class="meta-value">Riddhadipta Nath</span>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Course</span>
+        <span class="meta-value">Creation & Application of Knowledge Graphs (WS26/27)</span>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Institutions</span>
+        <span class="meta-value">Leibniz University Hannover · L3S Research Center · TIB</span>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Target / Repository</span>
+        <a class="meta-link" href="#">xinyue.gong@l3s.de · PR #2 (YASH123H/AutoEcoKG)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Introduction - Motivation -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">1. Introduction</div>
+      <div class="slide-title">Motivation & The Real-World Automotive Gap</div>
+      <div class="slide-subtitle">Why official lab ratings fail to reflect real-world vehicle impact and impending European regulations.</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-stripe stripe-red"></div>
+        <div class="card-title">1. Lab vs. Road Discrepancy</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>WLTP Underestimation:</strong> Official laboratory test cycles systematically underestimate real driving energy & fuel consumption by 15% to 30%.</li>
+          <li class="card-item"><strong>Empirical ADAC EcoTest:</strong> Independent tests capture realistic mixed cycles with cold starts, air conditioning loads, and high-speed highway segments.</li>
+          <li class="card-item"><strong>The Epistemic Gap:</strong> Fleet managers purchasing purely from OEM datasheets face severe budget overruns and carbon compliance penalties.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-blue"></div>
+        <div class="card-title">2. Euro 7 Paradigm Shift</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Beyond Tailpipe CO2:</strong> As vehicle fleets electrify, non-exhaust emissions (brake dust and tyre abrasion) dominate overall particulate pollution.</li>
+          <li class="card-item"><strong>Regulation (EU) 2024/1257:</strong> World's first standard setting strict brake PM10 limits: <strong>3 mg/km for BEVs</strong> vs. <strong>7 mg/km for ICE/HEVs</strong>.</li>
+          <li class="card-item"><strong>Tyre Microplastics:</strong> Quantifies tyre abrasion rates (mg/km/t) and partitions 90% into water/soil runoff and 10% into breathable PM10.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-green"></div>
+        <div class="card-title">3. Circular Battery Mandates</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Regulation (EU) 2023/1542:</strong> Mandates digital Battery Passports tracking chemistry, capacity, and State of Health (SoH) durability.</li>
+          <li class="card-item"><strong>Durability Milestones:</strong> Enforces legal guarantees of <strong>&ge;80% SoH at 5 yrs / 100k km</strong> and <strong>&ge;70% at 8 yrs / 160k km</strong>.</li>
+          <li class="card-item"><strong>Residual Asset Value:</strong> Battery health dictates second-life stationary storage repurposing and vehicle depreciation.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 2 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: Introduction - Role of Knowledge Graph -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">1. Introduction</div>
+      <div class="slide-title">Why a Graph-Native Knowledge Graph?</div>
+      <div class="slide-subtitle">Unifying multi-source testing data, regulatory standards, and supply-chain ontologies under formal semantics.</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-stripe stripe-red"></div>
+        <div class="card-title">Limitations of Relational & Vector Approaches</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Relational Data Silos:</strong> Tabular databases struggle with heterogeneous observations where testing protocols, vehicle variants, tyre fitments, and dynamic economic models share multi-tiered relationships.</li>
+          <li class="card-item"><strong>Lack of Standard Semantics:</strong> Different OEMs and tyre manufacturers employ conflicting dimension formats and naming conventions, making relational joins brittle.</li>
+          <li class="card-item"><strong>Vector Search Unreliability:</strong> High-dimensional embeddings lack verifiable constraint guarantees; they cannot prove that a fleet configuration complies with legal Euro 7 particulate limits or compute exact Pareto frontiers.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-cyan"></div>
+        <div class="card-title">Knowledge Graph Value Proposition</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Ontological Expressivity (OWL 2 DL):</strong> Formalizes vehicles, tyres, observations, battery milestones, and regulatory boundaries into a unified semantic graph.</li>
+          <li class="card-item"><strong>Multi-Hop Traversal (SPARQL 1.1):</strong> Seamlessly traces vehicle &rarr; fitted tyre dimension &rarr; tyre abrasion wear rate &rarr; microplastic runoff &rarr; fleet TCO without rigid join tables.</li>
+          <li class="card-item"><strong>Formal Validation (SHACL):</strong> Automated shapes validation enforces strict mathematical ranges and compliance limits across 29,739 RDF triples.</li>
+          <li class="card-item"><strong>Industrial Standard Mapping:</strong> Aligned with <strong>COVESA VSS 4.0</strong> signal paths and <strong>Catena-X Battery Pass</strong> specifications.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 3 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Knowledge Graph - Pipeline -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">2. Knowledge Graph</div>
+      <div class="slide-title">Data Ingestion & Graph Construction Pipeline</div>
+      <div class="slide-subtitle">Automated multi-source extraction, entity alignment, and provenance modeling across 28 source reports.</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-stripe stripe-blue"></div>
+        <div class="card-title">1. Multi-Source Ingestion</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Automated Data Downloader:</strong> Custom fetcher (<code>src/download_raw_data.py</code>) validates SHA-256 hashes of all 28 raw reports with automated retry logic.</li>
+          <li class="card-item"><strong>26 Vehicle EcoTests:</strong> High-precision PDF parser extracts 608 vehicle observations (WLTP lab ratings, ADAC test values, powertrain specs).</li>
+          <li class="card-item"><strong>160 Tyre Abrasion Tests:</strong> Tabular parser extracts wear rates (mg/km/t) and wet/dry safety ratings across 162 tyre models.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-cyan"></div>
+        <div class="card-title">2. Alignment & Modeling</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Entity Alignment:</strong> Deterministic dimension-matching engine connects 161 vehicle-tyre configuration candidate pairs.</li>
+          <li class="card-item"><strong>W3C SOSA/SSN Provenance:</strong> Every observation explicitly reifies source document, page number, test protocol, and observation context.</li>
+          <li class="card-item"><strong>Deterministic Normalization:</strong> Tyre dimensions (e.g., <code>225/40 R18</code> vs <code>225/40ZR18</code>) normalized into canonical semantic URIs.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-green"></div>
+        <div class="card-title">3. Graph Scale & Metrics</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>29,739 RDF Triples:</strong> Scaled graph (+1,811 triples over v1.0) serialized in Turtle syntax.</li>
+          <li class="card-item"><strong>Granular Entities:</strong> 26 vehicles, 162 tyres, 631 vehicle observations, 1,170 tyre observations, 161 configurations.</li>
+          <li class="card-item"><strong>SHACL Conformance:</strong> 100% conforming (0 errors, 0 violations) across all non-exhaust and battery constraints.</li>
+        </ul>
+        <div style="margin-top: 14px;"><span class="stat-badge stat-badge-green">29,739 TRIPLES · SHACL PASS</span></div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 4 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Knowledge Graph - Ontology -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">2. Knowledge Graph</div>
+      <div class="slide-title">Ontology & Schema Architecture</div>
+      <div class="slide-subtitle">Extending AutoEcoKG with Euro 7 non-exhaust particulates, Catena-X Battery Pass, and COVESA VSS 4.0.</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-stripe stripe-navy"></div>
+        <div class="card-title">Core Ontological Classes & Properties</div>
+        <ul class="card-list">
+          <li class="card-item"><code>aekg:VehicleVariant</code> &mdash; Tested models with powertrain type (BEV, HEV, PHEV, ICE) and curb weight.</li>
+          <li class="card-item"><code>aekg:TyreVariant</code> &mdash; Tyres with width, aspect ratio, diameter, rolling resistance, and safety ratings.</li>
+          <li class="card-item"><code>aekg:TyreAbrasionObservation</code> &mdash; Abrasion wear (mg/km/t), road runoff (90%), airborne PM10 (10%).</li>
+          <li class="card-item"><code>aekg:BrakeDustObservation</code> &mdash; Brake wear emissions against Euro 7 limits (3 mg/km BEV, 7 mg/km ICE).</li>
+          <li class="card-item"><code>aekg:BatteryDurabilityObservation</code> &mdash; SoH degradation milestones, battery chemistry (LFP, NMC), capacity.</li>
+          <li class="card-item"><code>aekg:VehicleTyreConfiguration</code> &mdash; Synthesizes real-world fitments for holistic fleet decision-making.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-blue"></div>
+        <div class="card-title">Industrial Standards Alignment & Validation</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>COVESA VSS 4.0 Signal Paths:</strong> Classes include <code>aekg:vssSignalPath</code> mapping to in-vehicle telematics (e.g., <code>Vehicle.Powertrain.TractionBattery.StateOfHealth</code>).</li>
+          <li class="card-item"><strong>Catena-X Battery Pass:</strong> Conforms to EU 2023/1542 digital product passport standards for circular economy traceability.</li>
+          <li class="card-item"><strong>SHACL Shape Constraints:</strong> <code>shacl_shapes.ttl</code> validates tyre abrasion ranges (0&ndash;500 mg/km/t), brake dust bounds (&ge;0), and battery milestones.</li>
+          <li class="card-item"><strong>Epistemic Reification:</strong> Separates official laboratory claims (<code>WLTPProtocol</code>) from empirical testing (<code>ADACEcoTestProtocol</code>).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 5 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Application - Architecture -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">3. Application</div>
+      <div class="slide-title">System Architecture & Core Analytical Modules</div>
+      <div class="slide-subtitle">A modular three-tier pipeline connecting the RDF graph to real-time fleet intelligence.</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-stripe stripe-navy"></div>
+        <div class="card-title">Layer 1: Semantic Storage</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>RDFLib In-Memory Triplestore:</strong> Fast triplestore loading 29,739 triples from Turtle file in &lt;1.5 seconds.</li>
+          <li class="card-item"><strong>Ontology Reasoning:</strong> Applies RDFS class and property subsumption for dynamic querying.</li>
+          <li class="card-item"><strong>SPARQL 1.1 Cache:</strong> Pre-compiled query templates for sub-millisecond analytical execution.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-cyan"></div>
+        <div class="card-title">Layer 2: Analytical Core</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Euro 7 Compliance Screener:</strong> Filters vehicle-tyre combinations against brake dust and tyre abrasion thresholds.</li>
+          <li class="card-item"><strong>Fleet Microplastic Calculator:</strong> Models environmental fate (water runoff vs. airborne PM10) for arbitrary fleet sizes.</li>
+          <li class="card-item"><strong>5-Criterion Pareto Skyline:</strong> Implements non-dominated sorting across economic and environmental vectors.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-green"></div>
+        <div class="card-title">Layer 3: Interactive UI</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Streamlit Dashboard (<code>app_v2.py</code>):</strong> 12 dedicated interactive views for fleet managers and policy makers.</li>
+          <li class="card-item"><strong>Interactive Parameter Sliders:</strong> Real-time adjustments for mileage, fuel/electricity tariffs, and carbon shadow taxes.</li>
+          <li class="card-item"><strong>Visual Pareto Frontiers:</strong> Multi-dimensional Plotly scatter plots with particulate bubble sizing.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 6 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Application - Euro 7 & Battery -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">3. Application</div>
+      <div class="slide-title">Euro 7 Non-Exhaust Particulates & Battery Lifecycle</div>
+      <div class="slide-subtitle">Operationalizing Regulation (EU) 2024/1257 and EU Battery Passport (EU 2023/1542).</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-stripe stripe-blue"></div>
+        <div class="card-title">Euro 7 Non-Exhaust Particulate Engine</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Brake Dust Limit Screening:</strong> Pure electric vehicles (BEVs) exploit regenerative braking: mandated <strong>3 mg/km</strong> limit vs. <strong>7 mg/km</strong> for ICE/HEV models. AutoEcoKG verifies compliance across all 26 variants.</li>
+          <li class="card-item"><strong>Tyre Abrasion Microplastics:</strong> Microplastics wear quantified per vehicle-tonne. AutoEcoKG partitions wear: <strong>90% road runoff into soil/water</strong>, <strong>10% airborne PM10</strong>.</li>
+          <li class="card-item"><strong>Fleet Microplastic Calculator:</strong> A 100-vehicle corporate fleet driving 20,000 km/yr produces ~196 kg of microplastics annually. The engine identifies low-wear tyres cutting emissions by up to 34%.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-green"></div>
+        <div class="card-title">Catena-X Battery Pass & Circular Durability</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Milestone Durability Verification:</strong> Tracks battery State of Health (SoH) against legal EU thresholds: <strong>&ge;80% at 5 yrs / 100,000 km</strong> and <strong>&ge;70% at 8 yrs / 160,000 km</strong>.</li>
+          <li class="card-item"><strong>Chemistry & Capacity Profiles:</strong> Captures cell chemistry (LFP with high cycle durability vs. NMC811 with high gravimetric energy density).</li>
+          <li class="card-item"><strong>Second-Life Readiness:</strong> Connects battery degradation to residual asset valuation and stationary BESS repurposing viability.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 7 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Application - Pareto Skyline TCO -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">3. Application</div>
+      <div class="slide-title">5-Criterion Pareto Skyline Fleet TCO Engine</div>
+      <div class="slide-subtitle">Multi-objective fleet optimization balancing economics, greenhouse gas, particulate wear, and safety.</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-stripe stripe-navy"></div>
+        <div class="card-title">5 Optimization Objectives</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>1. 5-Year TCO (&euro;):</strong> Acquisition + energy/fuel + maintenance + tyre replacements + CO2 shadow tax.</li>
+          <li class="card-item"><strong>2. WTW CO2 (g/km):</strong> Well-to-Wheel greenhouse gas emissions.</li>
+          <li class="card-item"><strong>3. Total PM10 (mg/km):</strong> Sum of exhaust, brake wear, and airborne tyre microplastics.</li>
+          <li class="card-item"><strong>4. Tyre Longevity (km):</strong> Service lifespan before replacement.</li>
+          <li class="card-item"><strong>5. Safety Score:</strong> ADAC driving safety and wet/dry braking.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-cyan"></div>
+        <div class="card-title">Skyline Dominance Pruning</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Zero-Weight Optimization:</strong> Eliminates subjective user weights; identifies mathematically non-dominated solutions.</li>
+          <li class="card-item"><strong>Strict Dominance Rule:</strong> Config A dominates B if A is no worse in all 5 criteria and strictly superior in at least one.</li>
+          <li class="card-item"><strong>Pruning Efficiency:</strong> Prunes 161 vehicle-tyre combinations down to ~12 Pareto-optimal fleet choices.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-green"></div>
+        <div class="card-title">Actionable Fleet Impact</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Dynamic Sensitivity:</strong> Real-time re-ranking as carbon price shifts from 0 to 300 &euro;/tonne and electricity prices fluctuate.</li>
+          <li class="card-item"><strong>Budget vs. CSR Alignment:</strong> Enables enterprise fleets to hit corporate ESG targets without inflating total capital expenditure.</li>
+          <li class="card-item"><strong>SPARQL 1.1 Implementation:</strong> Fully implemented in <code>queries/pareto_skyline_tco.rq</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 8 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: Application - Streamlit Dashboard -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">3. Application</div>
+      <div class="slide-title">Interactive Streamlit Dashboard (<code>src/app_v2.py</code>)</div>
+      <div class="slide-subtitle">A production-grade web application for compliance verification and fleet decision-making.</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-stripe stripe-cyan"></div>
+        <div class="card-title">12 Dedicated Analytical Views</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Overview & Vehicle Explorer:</strong> Fleet powertrain breakdown, technical specifications, and lab vs. road comparisons.</li>
+          <li class="card-item"><strong>Compare Vehicles:</strong> Multi-vehicle radar charts evaluating consumption gaps and test ratings.</li>
+          <li class="card-item"><strong>Euro 7 & Microplastics View:</strong> Interactive brake wear screening, microplastic partitioning, and fleet load calculator.</li>
+          <li class="card-item"><strong>Fleet TCO & Pareto View:</strong> Economic sliders (mileage, carbon tax, tariffs) with 2D Pareto scatter plots.</li>
+          <li class="card-item"><strong>Graph Explorer & SPARQL:</strong> Direct query interface with pre-built query templates and Turtle visualizer.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-blue"></div>
+        <div class="card-title">Dashboard Verification & Testing</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Zero-Crash Verification:</strong> Tested all 12 views via Streamlit <code>AppTest</code> headless runner with 0 runtime exceptions.</li>
+          <li class="card-item"><strong>Sub-Second Responsiveness:</strong> RDFLib in-memory queries execute instantaneously upon slider adjustments.</li>
+          <li class="card-item"><strong>How to Test:</strong> Run <code>.venv/bin/streamlit run src/app_v2.py</code> and navigate to <em>Euro 7 & Microplastics</em> and <em>Fleet TCO & Pareto</em>.</li>
+        </ul>
+        <div style="margin-top: 14px;"><span class="stat-badge">STREAMLIT APPTEST: 12/12 VIEWS VERIFIED</span></div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 9 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: Evaluation - Quantitative Results -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">4. Evaluation</div>
+      <div class="slide-title">Evaluation Design & Quantitative Benchmark</div>
+      <div class="slide-subtitle">Automated verification across 42 competency questions covering all functional domains.</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-stripe stripe-navy"></div>
+        <div class="card-title">Benchmark Suite (CQ 1&ndash;37)</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Taxonomy & Ingestion (CQ 1-8):</strong> Validates unique vehicle IDs, WLTP emissions, and fuel consumption divergence gaps.</li>
+          <li class="card-item"><strong>Tyre Metrics & Joins (CQ 9-22):</strong> Verifies abrasion observations, ascending rankings, safety joins, and document provenance.</li>
+          <li class="card-item"><strong>Recommendation Logic (CQ 23-32):</strong> Tests balanced multi-criteria rankings, dimension filtering, and edge cases.</li>
+          <li class="card-item"><strong>Input Validation (CQ 33-37):</strong> Validates rejection of malformed weights, thresholds, dimensions, and unknown queries.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-cyan"></div>
+        <div class="card-title">AutoEcoKG 2.0 Suite (CQ 38&ndash;42)</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>CQ-38: Euro 7 Brake Limits:</strong> Confirms presence of brake dust nodes and BEV 3 mg/km threshold screening.</li>
+          <li class="card-item"><strong>CQ-39: Microplastic Consistency:</strong> Verifies mathematical integrity of 90/10 environmental partitioning.</li>
+          <li class="card-item"><strong>CQ-40: Battery Durability:</strong> Confirms battery SoH observations match Euro 7 5-year/80% milestone.</li>
+          <li class="card-item"><strong>CQ-41: Pareto Skyline TCO:</strong> Validates multi-criteria skyline query returns valid, non-dominated configurations.</li>
+          <li class="card-item"><strong>CQ-42: Epistemic Divergence:</strong> Verifies 3-tier divergence (lab vs real vs delta).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-green"></div>
+        <div class="card-title">Quantitative Summary</div>
+        <table class="slide-table">
+          <tr><th>Metric</th><th>Result</th></tr>
+          <tr><td>Total Test Cases</td><td><strong>42</strong></td></tr>
+          <tr><td>Passed</td><td><strong>42 / 42</strong></td></tr>
+          <tr><td>Pass Rate</td><td><strong style="color: #15803d;">100.0%</strong></td></tr>
+          <tr><td>SHACL Conformance</td><td><strong>True (0 violations)</strong></td></tr>
+          <tr><td>Total RDF Triples</td><td><strong>29,739</strong></td></tr>
+          <tr><td>Execution Speed</td><td><strong>&lt;15 seconds (all 42)</strong></td></tr>
+        </table>
+        <div style="margin-top: 14px;"><span class="stat-badge stat-badge-green">BENCHMARK: 100% PASS RATE</span></div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 10 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: Evaluation - Qualitative Findings -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">4. Evaluation</div>
+      <div class="slide-title">Qualitative Evaluation & Automotive Discoveries</div>
+      <div class="slide-subtitle">Domain discoveries and failure analysis surfaced by semantic graph queries.</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-stripe stripe-red"></div>
+        <div class="card-title">1. Epistemic Divergence</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Empirical Consumption Gaps:</strong> Heavy combustion models like Renault Espace (+26%) and Hyundai Tucson exhibit massive real-world fuel divergence above WLTP.</li>
+          <li class="card-item"><strong>Thermal Penalty in BEVs:</strong> Electric vehicles reveal significant winter highway consumption increases due to cabin climate control and battery conditioning.</li>
+          <li class="card-item"><strong>Procurement Value:</strong> Fleet operators relying on AutoEcoKG avoid unexpected operational budget deficits.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-blue"></div>
+        <div class="card-title">2. The BEV Mass Paradox</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Regenerative Braking Win:</strong> Electric vehicles cut brake dust by &gt;55%, easily beating the stringent 3 mg/km Euro 7 limit.</li>
+          <li class="card-item"><strong>Tyre Abrasion Penalty:</strong> Heavier battery curb weights increase tyre abrasion wear by 12% to 18%, generating more microplastics.</li>
+          <li class="card-item"><strong>The Solution:</strong> AutoEcoKG surfaces specific low-wear premium tyres (e.g., Michelin e.Primacy) that offset the mass penalty, achieving dual compliance.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-green"></div>
+        <div class="card-title">3. Optimal Fleet Configurations</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Urban / Regional Fleets:</strong> Compact BEVs paired with low-abrasion tyres dominate the Pareto frontier under moderate-to-high carbon taxation (&gt;&euro;80/t).</li>
+          <li class="card-item"><strong>Highway Workhorses:</strong> High-efficiency diesels remain Pareto-optimal only where annual mileage exceeds 45,000 km in non-emission restricted zones.</li>
+          <li class="card-item"><strong>Full Transparency:</strong> Every recommendation provides auditable provenance back to original ADAC test pages.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 11 / 12</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: Conclusion & Reflection -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="section-tag">5. Conclusion & Reflection</div>
+      <div class="slide-title">Project Summary, Reflection & Future Outlook</div>
+      <div class="slide-subtitle">Learnings from engineering AutoEcoKG 2.0 and future research trajectories.</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-stripe stripe-green"></div>
+        <div class="card-title">Project Summary</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Comprehensive Knowledge Graph:</strong> Unified 29,739 triples across vehicles, tyres, non-exhaust emissions, battery durability, and fleet TCO.</li>
+          <li class="card-item"><strong>Regulatory Alignment:</strong> Operationalized Euro 7 (EU 2024/1257), Battery Pass (EU 2023/1542), and COVESA VSS 4.0.</li>
+          <li class="card-item"><strong>Production-Grade Delivery:</strong> Streamlit interactive dashboard and 42/42 automated competency test suite.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-blue"></div>
+        <div class="card-title">Challenges & Reflection</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Unstructured PDF Scraping:</strong> Minor layout shifts in ADAC reports across test years required resilient regex parsing strategies.</li>
+          <li class="card-item"><strong>Microplastic Dispersion Granularity:</strong> Macro 90/10 environmental split is effective for fleet screening; localized runoff requires GeoSPARQL watershed modeling.</li>
+          <li class="card-item"><strong>What We'd Do Differently:</strong> Adopt declarative R2RML / YARRRML mapping rules from the start to accelerate ingestion pipeline scalability.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-stripe stripe-cyan"></div>
+        <div class="card-title">Future Outlook</div>
+        <ul class="card-list">
+          <li class="card-item"><strong>Live Telematics Streaming:</strong> Ingest real-time CAN-bus / OBD-II signals via COVESA VSS over MQTT/Kafka for real-time fleet wear tracking.</li>
+          <li class="card-item"><strong>Catena-X Data Space Connector:</strong> Federated integration with OEM digital battery passports via Eclipse Dataspace Connector (EDC).</li>
+          <li class="card-item"><strong>Graph Neural Networks:</strong> Train Link Prediction models on <code>aekg:VehicleTyreConfiguration</code> to predict real-world tyre lifespans on new unreleased vehicle models.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>AutoEcoKG 2.0 | Creation and Application of Knowledge Graphs (WS26/27) | LUH · L3S · TIB</span>
+      <span class="slide-number">Slide 12 / 12</span>
+    </div>
+  </div>
+
+</body>
+</html>

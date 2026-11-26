@@ -349,3 +349,152 @@ aek:MeasurementUnit a owl:Class ;
 aek:MeasurementProperty a owl:Class ;
     rdfs:comment "A measured or declared characteristic."@en .
 
+# =====================================================================
+# AutoEcoKG 2.0 Extensions: Euro 7, Non-Exhaust, LCA & Fleet TCO
+# =====================================================================
+
+aek:VehicleModelVariant a owl:Class ;
+    rdfs:subClassOf sosa:FeatureOfInterest , prov:Entity ;
+    rdfs:comment "Canonical EU Type-Variant-Version (TVV) vehicle specification aggregated from EEA CoC data."@en .
+
+aek:TyreModel a owl:Class ;
+    rdfs:subClassOf sosa:FeatureOfInterest , prov:Entity ;
+    rdfs:comment "Pneumatic tyre SKU classified under UNECE Class C1, C2, or C3."@en .
+
+aek:VehicleTyreConfiguration a owl:Class ;
+    rdfs:subClassOf sosa:FeatureOfInterest ;
+    rdfs:comment "Valid operational pairing of a VehicleModelVariant and TyreModel for compliance and Pareto TCO."@en .
+
+aek:RealWorldConsumptionDistribution a owl:Class ;
+    rdfs:subClassOf sosa:Observation , prov:Entity ;
+    rdfs:comment "Statistically aggregated real-world fuel/energy consumption (e.g., Spritmonitor or OBFCM cohort)."@en .
+
+aek:TUVInspectionCohort a owl:Class ;
+    rdfs:subClassOf sosa:Observation , prov:Entity ;
+    rdfs:comment "Age-bracketed periodic technical inspection (HU) defect rate and mileage cohort."@en .
+
+aek:EntityAlignment a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:comment "Probabilistic cross-dataset entity match with explicit linkage confidence score."@en .
+
+aek:TyreAbrasionObservation a owl:Class ;
+    rdfs:subClassOf sosa:Observation , prov:Entity ;
+    rdfs:comment "UNECE WP.29 / Euro 7 tyre abrasion measurement capturing rate (mg/km), level (mg/km/t), and AI_CT."@en .
+
+aek:BrakeDustObservation a owl:Class ;
+    rdfs:subClassOf sosa:Observation , prov:Entity ;
+    rdfs:comment "Euro 7 WLTP-Brake PM10 mass emission observation (mg/km)."@en .
+
+aek:BatteryDurabilityObservation a owl:Class ;
+    rdfs:subClassOf sosa:Observation , prov:Entity ;
+    rdfs:comment "EV/PHEV traction battery State-of-Health (SoH %) observation at milestone age/mileage."@en .
+
+aek:EnvironmentalVehiclePassport a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:comment "Digital Euro 7 Environmental Vehicle Passport (EVP) aligned with Catena-X AAS/SAMM."@en .
+
+aek:LifecycleStageImpact a owl:Class ;
+    rdfs:subClassOf sosa:Observation , prov:Entity ;
+    rdfs:comment "ISO 14040/14044 Cradle-to-Grave GWP100 impact for a specific lifecycle stage."@en .
+
+aek:TCOCalculation a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:comment "Discounted multi-year Fleet Total Cost of Ownership calculation bound to operational parameters."@en .
+
+aek:ESRSE2PollutionDisclosure a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:comment "Audit-ready CSRD ESRS E2-4 / E2-5 air, soil, and water particulate/microplastic disclosure."@en .
+
+# AutoEcoKG 2.0 Properties
+aek:hasVehicleVariant a owl:ObjectProperty ;
+    rdfs:domain aek:VehicleTyreConfiguration ;
+    rdfs:range aek:VehicleVariant .
+
+aek:hasTyreModel a owl:ObjectProperty ;
+    rdfs:domain aek:VehicleTyreConfiguration ;
+    rdfs:range aek:TyreVariant .
+
+aek:hasTCOCalculation a owl:ObjectProperty ;
+    rdfs:domain aek:VehicleTyreConfiguration ;
+    rdfs:range aek:TCOCalculation .
+
+aek:referenceSRTT a owl:ObjectProperty ;
+    rdfs:domain aek:TyreAbrasionObservation ;
+    rdfs:range aek:TyreVariant ;
+    rdfs:comment "Reference ASTM Standard Reference Test Tyre (SRTT17S or SRTT17W) used for AI_CT normalization."@en .
+
+aek:vssSignalPath a owl:DatatypeProperty ;
+    rdfs:domain sosa:ObservableProperty ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Canonical COVESA VSS dot-notation path."@en .
+
+aek:sammAspectUrn a owl:DatatypeProperty ;
+    rdfs:domain owl:Class ;
+    rdfs:range xsd:anyURI ;
+    rdfs:comment "Corresponding Catena-X SAMM Aspect Model URN."@en .
+
+aek:abrasionRateMgKm a owl:DatatypeProperty ;
+    rdfs:domain aek:TyreAbrasionObservation ;
+    rdfs:range xsd:decimal .
+
+aek:abrasionLevelMgKmTonne a owl:DatatypeProperty ;
+    rdfs:domain aek:TyreAbrasionObservation ;
+    rdfs:range xsd:decimal .
+
+aek:abrasionIndexAICT a owl:DatatypeProperty ;
+    rdfs:domain aek:TyreAbrasionObservation ;
+    rdfs:range xsd:decimal .
+
+aek:airbornePM10Fraction a owl:DatatypeProperty ;
+    rdfs:domain aek:TyreAbrasionObservation ;
+    rdfs:range xsd:decimal .
+
+aek:brakePM10MgKm a owl:DatatypeProperty ;
+    rdfs:domain aek:BrakeDustObservation ;
+    rdfs:range xsd:decimal .
+
+aek:batterySoHPercent a owl:DatatypeProperty ;
+    rdfs:domain aek:BatteryDurabilityObservation ;
+    rdfs:range xsd:decimal .
+
+aek:milestoneYears a owl:DatatypeProperty ;
+    rdfs:domain aek:BatteryDurabilityObservation ;
+    rdfs:range xsd:integer .
+
+aek:milestoneKm a owl:DatatypeProperty ;
+    rdfs:domain aek:BatteryDurabilityObservation ;
+    rdfs:range xsd:integer .
+
+aek:wetGripScore a owl:DatatypeProperty ;
+    rdfs:domain aek:TyreVariant ;
+    rdfs:range xsd:decimal .
+
+aek:rollingResistanceCoeff a owl:DatatypeProperty ;
+    rdfs:domain aek:TyreVariant ;
+    rdfs:range xsd:decimal .
+
+aek:predictedTreadLifespanKm a owl:DatatypeProperty ;
+    rdfs:domain aek:VehicleTyreConfiguration ;
+    rdfs:range xsd:integer .
+
+aek:fiveYearTCOEur a owl:DatatypeProperty ;
+    rdfs:domain aek:TCOCalculation ;
+    rdfs:range xsd:decimal .
+
+aek:powertrainType a owl:DatatypeProperty ;
+    rdfs:domain aek:VehicleVariant ;
+    rdfs:range xsd:string .
+
+aek:massInRunningOrderKg a owl:DatatypeProperty ;
+    rdfs:domain aek:VehicleVariant ;
+    rdfs:range xsd:decimal .
+
+aek:segment a owl:DatatypeProperty ;
+    rdfs:domain aek:VehicleVariant ;
+    rdfs:range xsd:string .
+
+aek:tyreClass a owl:DatatypeProperty ;
+    rdfs:domain aek:TyreVariant ;
+    rdfs:range xsd:string .
+
+

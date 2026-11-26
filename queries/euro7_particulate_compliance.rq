@@ -1,0 +1,39 @@
+PREFIX aek: <https://w3id.org/autoecokg/ontology#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?vehicleName ?powertrain ?tyreName ?abrasionLevel ?aiCT ?brakePM10 ?brakeCompliant
+       (ROUND(?annualMicroplasticSoilWaterKg * 100) / 100.0 AS ?fleetSoilWaterMicroplasticsKgYr)
+       (ROUND(?annualAirbornePM10Grams * 10) / 10.0 AS ?fleetAirborneTyrePM10GramsYr)
+WHERE {
+  BIND(100 AS ?fleetSize)
+  BIND(25000 AS ?annualKmPerVehicle)
+
+  ?cfg a aek:VehicleTyreConfiguration ;
+       aek:hasVehicleVariant ?vehicle ;
+       aek:hasTyreModel ?tyre .
+
+  ?vehicle rdfs:label ?vehicleName ;
+           aek:powertrain ?powertrain ;
+           aek:massInRunningOrderKg ?massKg .
+  ?tyre rdfs:label ?tyreName .
+
+  ?abrObs a aek:TyreAbrasionObservation ;
+          sosa:hasFeatureOfInterest ?tyre ;
+          aek:abrasionLevelMgKmTonne ?abrasionLevel ;
+          aek:abrasionIndexAICT ?aiCT ;
+          aek:airbornePM10Fraction ?alphaPM10 .
+
+  ?brakeObs a aek:BrakeDustObservation ;
+            sosa:hasFeatureOfInterest ?vehicle ;
+            aek:brakePM10MgKm ?brakePM10 .
+
+  BIND(IF(?powertrain = "electric", 3.0, 7.0) AS ?euro7BrakeLimit)
+  BIND(?brakePM10 <= ?euro7BrakeLimit AS ?brakeCompliant)
+
+  BIND(?abrasionLevel * (?massKg / 1000.0) AS ?vehAbrasionMgKm)
+  BIND((?vehAbrasionMgKm * (1.0 - ?alphaPM10) * ?annualKmPerVehicle * ?fleetSize) / 1000000.0
+       AS ?annualMicroplasticSoilWaterKg)
+  BIND((?vehAbrasionMgKm * ?alphaPM10 * ?annualKmPerVehicle * ?fleetSize) / 1000.0
+       AS ?annualAirbornePM10Grams)
+} ORDER BY ?vehicleName ?tyreName

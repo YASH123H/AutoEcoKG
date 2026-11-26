@@ -1,0 +1,14 @@
+PREFIX aek: <https://w3id.org/autoecokg/ontology#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?vehicleName ?tyreName ?lifespanKm ?tcoEur WHERE {
+  ?cfg a aek:VehicleTyreConfiguration ;
+       aek:hasVehicleVariant ?vehicle ;
+       aek:hasTyreModel ?tyre ;
+       aek:predictedTreadLifespanKm ?lifespanKm ;
+       aek:hasTCOCalculation ?tco .
+  ?tco aek:fiveYearTCOEur ?tcoEur .
+  ?vehicle rdfs:label ?vehicleName .
+  ?tyre rdfs:label ?tyreName .
+} ORDER BY ?tcoEur ?vehicleName

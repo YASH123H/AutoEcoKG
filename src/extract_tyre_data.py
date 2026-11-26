@@ -3,7 +3,10 @@ import argparse
 import csv
 import re
 from pathlib import Path
-import fitz
+try:
+    import pymupdf as fitz
+except ImportError:
+    import fitz
 
 ROOT = Path(__file__).resolve().parents[1]
 ABRASION = 'adac_tyre_abrasion_2023_2025.pdf'

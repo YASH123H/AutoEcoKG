@@ -1,0 +1,16 @@
+PREFIX aek: <https://w3id.org/autoecokg/ontology#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?vehicleName ?powertrain ?wltp ?adac ?gap WHERE {
+  ?vehicle a aek:VehicleVariant ; rdfs:label ?vehicleName ; aek:powertrain ?powertrain .
+  {
+    ?w sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:wltp_fuel_l_100km ; aek:numericValue ?wltp .
+    ?a sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:adac_fuel_l_100km ; aek:numericValue ?adac .
+    ?g sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:fuel_l_100km_gap_pct ; aek:numericValue ?gap .
+  } UNION {
+    ?w sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:wltp_electric_kwh_100km ; aek:numericValue ?wltp .
+    ?a sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:adac_electric_kwh_100km ; aek:numericValue ?adac .
+    ?g sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:electric_kwh_100km_gap_pct ; aek:numericValue ?gap .
+  }
+} ORDER BY DESC(?gap) ?vehicleName

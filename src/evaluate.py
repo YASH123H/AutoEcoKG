@@ -142,6 +142,47 @@ def evaluate(engine, folder):
     case('negative','Malformed dimension rejected',lambda:expect_error(lambda:rank(size='bad-size')))
     case('negative','Nonpositive abrasion threshold rejected',lambda:expect_error(lambda:rank(abrasion=0)))
     case('negative','Unknown SPARQL query rejected',lambda:expect_error(lambda:engine.run('unknown_query')))
+
+    # AutoEcoKG 2.0 Competency Questions
+    def test_euro7_particulates():
+        cols, rows = engine.run('euro7_particulates')
+        if not rows: return False, 'No Euro 7 particulate rows returned'
+        bev_rows = [r for r in rows if r['powertrain'] == 'electric']
+        ice_rows = [r for r in rows if r['powertrain'] != 'electric']
+        if not bev_rows or not ice_rows: return False, 'Missing BEV or ICE rows'
+        if not all(r['brakeCompliant'] in ('true', 'True') for r in rows):
+            return False, 'Compliance flag error'
+        return True, f'{len(rows)} Euro 7 vehicle-tyre particulate configurations screened'
+
+    def test_microplastic_math():
+        from recommendation import calculate_euro7_particulates
+        res = calculate_euro7_particulates(abrasion_level_mg_km_t=70, vehicle_mass_kg=1500, powertrain='BEV', annual_km=25000, fleet_size=100)
+        ok = res['veh_abrasion_rate_mg_km'] == 105.0 and res['soil_water_microplastics_kg_yr'] == 236.25 and res['airborne_pm10_grams_yr'] == 26250.0
+        return ok, f"Calculated: {res['soil_water_microplastics_kg_yr']} kg/yr soil/water, {res['airborne_pm10_grams_yr']} g/yr air"
+
+    def test_battery_durability():
+        cols, rows = engine.run('battery_durability')
+        if len(rows) != 8: return False, f'Expected 8 electric vehicles, got {len(rows)}'
+        ok = all(number(r['sohPercent']) >= 80 and r['milestoneYears'] == '5' and r['euro7Compliant'] in ('true', 'True') for r in rows)
+        return ok, f'{len(rows)} BEV battery durability records conform to Euro 7 milestone'
+
+    def test_tco_skyline():
+        cols, rows = engine.run('tco_pareto_skyline')
+        if not rows: return False, 'No TCO skyline rows returned'
+        ok = all(number(r['tcoEur']) > 0 and number(r['lifespanKm']) >= 10000 for r in rows)
+        return ok, f'{len(rows)} TCO configuration records evaluated'
+
+    def test_epistemic_divergence():
+        cols, rows = engine.run('epistemic_divergence')
+        if len(rows) != 23: return False, f'Expected 23 comparable gap rows, got {len(rows)}'
+        return True, f'{len(rows)} three-tier epistemic divergence records verified'
+
+    case('euro7', 'Euro 7 brake dust observation presence and BEV limit screening', test_euro7_particulates)
+    case('euro7', 'Microplastic fleet load calculation is mathematically consistent', test_microplastic_math)
+    case('durability', 'Battery durability observations conform to Euro 7 5-year milestone', test_battery_durability)
+    case('tco', 'Multi-criteria TCO skyline query returns valid configurations', test_tco_skyline)
+    case('epistemic', 'Three-tier epistemic divergence returns populated records', test_epistemic_divergence)
+
     results=[]
     for i,(group,question,fn) in enumerate(tests,1):
         start=time.perf_counter()

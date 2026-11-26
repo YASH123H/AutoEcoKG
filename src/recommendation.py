@@ -55,6 +55,40 @@ def recommend(engine, size, category='summer', max_safety=2.5, abrasion_weight=0
         r['score'] = round(r['score'],6)
     return rows
 
+def calculate_euro7_particulates(abrasion_level_mg_km_t, vehicle_mass_kg, powertrain='BEV', annual_km=25000, fleet_size=1, alpha_pm10=0.10):
+    """Computes Euro 7 brake and tyre particulate metrics."""
+    veh_abrasion_rate = float(abrasion_level_mg_km_t) * (float(vehicle_mass_kg) / 1000.0)
+    soil_water_microplastics_kg_yr = (veh_abrasion_rate * (1.0 - alpha_pm10) * annual_km * fleet_size) / 1e6
+    airborne_pm10_grams_yr = (veh_abrasion_rate * alpha_pm10 * annual_km * fleet_size) / 1e3
+    brake_limit = 3.0 if str(powertrain).upper() in ('BEV', 'ELECTRIC') else 7.0
+    return {
+        'veh_abrasion_rate_mg_km': round(veh_abrasion_rate, 2),
+        'soil_water_microplastics_kg_yr': round(soil_water_microplastics_kg_yr, 3),
+        'airborne_pm10_grams_yr': round(airborne_pm10_grams_yr, 2),
+        'euro7_brake_limit_mg_km': brake_limit
+    }
+
+def recommend_fleet_tco_pareto(candidates, weights=None):
+    """5-criterion Pareto optimization for fleet tyre selection."""
+    if not candidates:
+        return []
+    for r in candidates:
+        r['pareto_optimal'] = not any(
+            q['safety'] <= r['safety'] and
+            q['abrasion'] <= r['abrasion'] and
+            q.get('lifespan', 40000) >= r.get('lifespan', 40000) and
+            q.get('rolling_resistance', 0.008) <= r.get('rolling_resistance', 0.008) and
+            q.get('tco', 30000) <= r.get('tco', 30000) and
+            (q['safety'] < r['safety'] or
+             q['abrasion'] < r['abrasion'] or
+             q.get('lifespan', 40000) > r.get('lifespan', 40000) or
+             q.get('rolling_resistance', 0.008) < r.get('rolling_resistance', 0.008) or
+             q.get('tco', 30000) < r.get('tco', 30000))
+            for q in candidates
+        )
+    return candidates
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--graph',type=Path,default=Path(__file__).resolve().parent.parent/'data/autoecokg_triples.ttl')

@@ -575,8 +575,15 @@ If continuing an existing clone, do not clone again or recreate the working envi
 python -m pip show pymupdf rdflib pyshacl pandas plotly streamlit
 ```
 
-### 2. Place source files
+### 2. Download or place source files
 
+Download all 28 exact ADAC source reports automatically:
+
+```powershell
+python src/download_raw_data.py
+```
+
+Alternatively, manually place the source files:
 - Put the 26 individual vehicle Autotest PDFs in `data/raw/adac/`. Do not put methodology-only documents or duplicate PDFs there.
 - Put the two tyre PDFs in `data/raw/tyres/` with the exact filenames `adac_tyre_abrasion_2023_2025.pdf` and `adac_summer_tyres_2025.pdf`.
 - Keep EEA/TÜV folders empty unless future integration code is developed.

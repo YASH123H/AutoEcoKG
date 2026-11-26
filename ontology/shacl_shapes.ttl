@@ -52,3 +52,74 @@ aek:AliasShape a sh:NodeShape ; sh:targetClass aek:TyreAliasCandidate ;
  sh:property [ sh:path prov:wasDerivedFrom ; sh:minCount 2 ; sh:maxCount 2 ; sh:class aek:TyreSourceRecord ] .
 aek:SourceShape a sh:NodeShape ; sh:targetClass aek:SourceDocument ;
  sh:property [ sh:path aek:sourceFilename ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
+
+# AutoEcoKG 2.0 Shapes: Euro 7 & Durability
+aek:TyreAbrasionObservationShape a sh:NodeShape ;
+    sh:targetClass aek:TyreAbrasionObservation ;
+    sh:property [
+        sh:path sosa:hasFeatureOfInterest ;
+        sh:class aek:TyreVariant ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "TyreAbrasionObservation must reference exactly one TyreVariant."@en ;
+    ] ;
+    sh:property [
+        sh:path aek:abrasionLevelMgKmTonne ;
+        sh:datatype xsd:decimal ;
+        sh:minExclusive 0.0 ; sh:maxInclusive 500.0 ;
+        sh:minCount 1 ;
+        sh:message "Abrasion level (mg/km/t) must be within physically valid bounds (0, 500]."@en ;
+    ] ;
+    sh:property [
+        sh:path aek:airbornePM10Fraction ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ; sh:maxInclusive 1.0 ;
+        sh:minCount 1 ;
+    ] .
+
+aek:BatteryDurabilityShape a sh:NodeShape ;
+    sh:targetClass aek:BatteryDurabilityObservation ;
+    sh:property [
+        sh:path aek:batterySoHPercent ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ; sh:maxInclusive 100.0 ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path aek:milestoneYears ;
+        sh:datatype xsd:integer ;
+        sh:in ( 5 8 ) ;
+        sh:minCount 1 ;
+    ] .
+
+aek:BrakeDustObservationShape a sh:NodeShape ;
+    sh:targetClass aek:BrakeDustObservation ;
+    sh:property [
+        sh:path sosa:hasFeatureOfInterest ;
+        sh:class aek:VehicleVariant ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path aek:brakePM10MgKm ;
+        sh:datatype xsd:decimal ;
+        sh:minExclusive 0.0 ; sh:maxInclusive 50.0 ;
+        sh:minCount 1 ;
+    ] .
+
+aek:VehicleTyreConfigurationShape a sh:NodeShape ;
+    sh:targetClass aek:VehicleTyreConfiguration ;
+    sh:property [
+        sh:path aek:hasVehicleVariant ;
+        sh:class aek:VehicleVariant ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path aek:hasTyreModel ;
+        sh:class aek:TyreVariant ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path aek:predictedTreadLifespanKm ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 5000 ;
+    ] .
+

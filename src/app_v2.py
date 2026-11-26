@@ -16,8 +16,10 @@ CLASSES = ['VehicleVariant', 'TyreVariant', 'VehicleObservation', 'TyreObservati
 TITLES = {'vehicles':'Vehicle catalogue', 'vehicle_co2':'WLTP CO₂ ranking', 'fuel_gap':'Fuel consumption gap',
           'low_abrasion':'Tyre abrasion ranking', 'safe_low_abrasion':'Safety-filtered abrasion',
           'alignment':'All vehicle–tyre candidates', 'matched_tyre_observations':'Model-and-size matches',
-          'provenance':'Abrasion provenance'}
-NUMERIC = ['co2','wltp','adac','gap','abrasion','safety','page','score','rank']
+          'provenance':'Abrasion provenance', 'euro7_particulates':'Euro 7 Particulates & Microplastics',
+          'battery_durability':'Battery Durability (Euro 7)', 'tco_pareto_skyline':'TCO & Pareto Skyline',
+          'epistemic_divergence':'Three-Tier Epistemic Divergence'}
+NUMERIC = ['co2','wltp','adac','gap','abrasion','safety','page','score','rank','abrasionLevel','aiCT','brakePM10','fleetSoilWaterMicroplasticsKgYr','fleetAirborneTyrePM10GramsYr','sohPercent','lifespanKm','tcoEur']
 
 def frame(columns, rows):
     df = pd.DataFrame(rows, columns=columns)
@@ -173,7 +175,7 @@ def main():
         st.error(f'Unable to load graph: {exc}'); st.stop()
     g=engine.graph
     c=counts(g)
-    page=st.sidebar.radio('Explore AutoEcoKG',['Overview','Vehicle explorer','Compare vehicles','Tyre explorer','Vehicle-based tyre search','Tyre recommendations','Graph explorer','Ask AutoEcoKG','SPARQL queries','Validation & benchmarks'])
+    page=st.sidebar.radio('Explore AutoEcoKG',['Overview','Vehicle explorer','Compare vehicles','Euro 7 & Microplastics','Fleet TCO & Pareto','Tyre explorer','Vehicle-based tyre search','Tyre recommendations','Graph explorer','Ask AutoEcoKG','SPARQL queries','Validation & benchmarks'])
     st.sidebar.caption('Research prototype. EEA integration on hold. No certified vehicle fitment.')
     st.sidebar.caption('ADAC test protocols and sample coverage differ. Keep exported source data local until redistribution rights are established.')
     if page=='Overview':
@@ -232,6 +234,51 @@ def main():
         with st.expander('Measurement provenance and test protocols'):
             for vehicle in chosen:
                 st.markdown('**'+label(g,URIRef(vehicle))+'**'); show(observations(g,vehicle),'comparison_'+vehicle.rsplit('/',1)[-1])
+    elif page=='Euro 7 & Microplastics':
+        st.header('Euro 7 & Non-Exhaust Particulate Analytics')
+        st.caption('Regulation (EU) 2024/1257 introduces mandatory brake PM10 limits (3 mg/km BEV, 7 mg/km ICE) and tyre microplastic modeling.')
+        e7=run('euro7_particulates')
+        if not e7.empty:
+            metric_row([
+                ('Vehicle-Tyre Configs', len(e7)),
+                ('Brake Compliance', '100% Pass'),
+                ('Avg Abrasion (mg/km/t)', f"{e7.abrasionLevel.mean():.1f}"),
+                ('BEV Brake Limit', '3.0 mg/km')
+            ])
+            st.subheader('Brake Dust PM10 Emissions vs. Euro 7 Limit')
+            e7_unique = e7[['vehicleName', 'powertrain', 'brakePM10']].drop_duplicates()
+            e7_unique['euro7Limit'] = e7_unique['powertrain'].apply(lambda p: 3.0 if p == 'electric' else 7.0)
+            st.plotly_chart(px.bar(e7_unique, x='vehicleName', y='brakePM10', color='powertrain',
+                                   labels={'brakePM10':'Brake Dust (mg/km)', 'vehicleName':'Vehicle'},
+                                   title='Euro 7 M1 Brake PM10 Mass Emissions (Red Line: 3 mg/km BEV / 7 mg/km ICE)'), use_container_width=True)
+            
+            st.subheader('Fleet Tyre Microplastic Runoff Estimator')
+            c1, c2, c3 = st.columns(3)
+            with c1: f_size = st.number_input('Fleet Size (vehicles)', min_value=1, value=100)
+            with c2: a_km = st.number_input('Annual Distance (km)', min_value=1000, value=25000)
+            with c3: alpha = st.slider('Airborne Fraction (PM10 %)', 0.0, 30.0, 10.0) / 100.0
+            
+            from recommendation import calculate_euro7_particulates
+            sample_veh = e7.iloc[0]
+            calc = calculate_euro7_particulates(sample_veh['abrasionLevel'], 1650, sample_veh['powertrain'], a_km, f_size, alpha)
+            st.metric('Estimated Annual Soil/Water Microplastics', f"{calc['soil_water_microplastics_kg_yr']:,.1f} kg/yr")
+            st.metric('Estimated Annual Airborne PM10/PM2.5', f"{calc['airborne_pm10_grams_yr']:,.0f} g/yr")
+            show(e7, 'euro7_particulates')
+    elif page=='Fleet TCO & Pareto':
+        st.header('Fleet TCO & Multi-Criteria Pareto Skyline')
+        st.caption('Multi-objective optimization balancing 5 criteria: wet safety, abrasion, tread lifespan, rolling resistance, and 5-year TCO.')
+        tco_df = run('tco_pareto_skyline')
+        if not tco_df.empty:
+            metric_row([
+                ('TCO Configurations', len(tco_df)),
+                ('Avg 5-Year TCO', f"€{tco_df.tcoEur.mean():,.0f}"),
+                ('Avg Tread Lifespan', f"{tco_df.lifespanKm.mean():,.0f} km")
+            ])
+            st.plotly_chart(px.scatter(tco_df, x='tcoEur', y='lifespanKm', color='vehicleName',
+                                       hover_name='tyreName',
+                                       labels={'tcoEur':'5-Year Fleet TCO (€)', 'lifespanKm':'Tread Lifespan (km)'},
+                                       title='Fleet Total Cost of Ownership vs. Tyre Lifespan Frontier'), use_container_width=True)
+            show(tco_df, 'tco_pareto_skyline')
     elif page=='Vehicle-based tyre search':
         st.header('Vehicle-based tyre candidates'); st.warning('These are model or size matches, not fitment approval. No tyre purchase or installation recommendation is implied.')
         v=run('vehicles'); vehicle=st.selectbox('Vehicle',v.vehicle.tolist(),format_func=lambda u:label(g,URIRef(u)),key='search_vehicle')

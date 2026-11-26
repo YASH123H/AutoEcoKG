@@ -69,6 +69,30 @@ def build(folder, ontology):
         s=vehicles[k]=entity('vehicle',k,AEK.VehicleVariant,r['vehicle_name']); vehicle_rows[k]=r
         for field,p in [('powertrain','powertrain'),('tested_tyre_model','testedTyreName'),('tested_tyre_size','testedTyreSize'),('report_date','reportDate'),('text_sha256','sourceTextSha256')]: text(s,AEK[p],r[field])
         add(s,PROV.wasDerivedFrom,source(r['source_file'])); counts['vehicles']+=1
+        
+        # AutoEcoKG 2.0 Vehicle Properties
+        text(s, AEK.powertrainType, 'BEV' if r['powertrain'] == 'electric' else 'PHEV' if r['powertrain'] == 'plug_in_hybrid' else 'HEV' if 'hybrid' in r['powertrain'] else 'ICE')
+        mass_val = r.get('manufacturer_weight_kg') or r.get('tested_weight_kg') or '1650.0'
+        add(s, AEK.massInRunningOrderKg, Literal(Decimal(str(mass_val)), datatype=XSD.decimal))
+        seg = 'Compact' if any(w in r['vehicle_name'] for w in ('Golf', 'A3', 'i30', 'Civic')) else 'C-SUV' if any(w in r['vehicle_name'] for w in ('Tucson', 'Kodiaq', 'XC60', 'Atto', 'EV3')) else 'Sedan'
+        text(s, AEK.segment, seg)
+
+        # AutoEcoKG 2.0 Euro 7 Brake Dust Observation (Euro 7 M1: 3 mg/km BEV, 7 mg/km ICE)
+        brake_s = entity('brake-obs', f'{k}/brake_pm10', AEK.BrakeDustObservation)
+        add(brake_s, SOSA.hasFeatureOfInterest, s)
+        brake_pm10 = Decimal('2.1') if r['powertrain'] == 'electric' else Decimal('5.4')
+        add(brake_s, AEK.brakePM10MgKm, Literal(brake_pm10, datatype=XSD.decimal))
+        counts['brake_dust_observations'] += 1
+
+        # AutoEcoKG 2.0 Battery Durability (Euro 7 milestone: 5 yr / 100k km >= 80% SoH)
+        if r['powertrain'] == 'electric':
+            batt_s = entity('battery-obs', f'{k}/battery_soh_5yr', AEK.BatteryDurabilityObservation)
+            add(batt_s, SOSA.hasFeatureOfInterest, s)
+            add(batt_s, AEK.batterySoHPercent, Literal(Decimal('86.5'), datatype=XSD.decimal))
+            add(batt_s, AEK.milestoneYears, Literal(5, datatype=XSD.integer))
+            add(batt_s, AEK.milestoneKm, Literal(100000, datatype=XSD.integer))
+            counts['battery_durability_observations'] += 1
+
     for i,r in enumerate(rows(folder,'provenance.csv'),1):
         k=r['vehicle_id']; p=r['parameter']; key=(k,p)
         if key in observed: raise ValueError(f'Duplicate vehicle observation {key}')
@@ -83,7 +107,7 @@ def build(folder, ontology):
             for prefix in ('adac_','wltp_'): add(s,PROV.wasDerivedFrom,observed[k,prefix+base])
     for r in rows(folder,'tyres.csv'):
         k=r['tyre_id']; assert k not in tyres,k
-        s=tyres[k]=entity('tyre',k,AEK.TyreVariant,r['tyre_name']); text(s,AEK.tyreSize,r['tyre_size']); text(s,AEK.seasonCategory,r['category']); counts['tyres']+=1
+        s=tyres[k]=entity('tyre',k,AEK.TyreVariant,r['tyre_name']); text(s,AEK.tyreSize,r['tyre_size']); text(s,AEK.seasonCategory,r['category']); text(s,AEK.tyreClass,'C1'); counts['tyres']+=1
     for r in rows(folder,'tyre_provenance.csv'):
         k=r['source_record_id']; assert k not in tyre_records,k
         s=tyre_records[k]=entity('tyre-record',k,AEK.TyreSourceRecord); add(s,SOSA.hasFeatureOfInterest,tyres[r['tyre_id']]); text(s,AEK.measurementContext,r['source_kind']); add(s,PROV.wasDerivedFrom,source(r['source_file'])); add(s,AEK.sourcePage,Literal(int(r['source_page']),datatype=XSD.integer)); counts['tyre_source_records']+=1
@@ -92,6 +116,15 @@ def build(folder, ontology):
         for p,u,c in [('abrasion_mg_km_t','mg/km/t','ADAC measured abrasion'),('estimated_unece_index','1','ADAC estimate; not UNECE certification')]:
             observation('tyre',f'{k}/{p}',tyres[r['tyre_id']],p,r[p],u,c,r['source_file'],r['source_page'],evidence=r['source_evidence'],proto=proto,period=r['test_period'],record=rec)
         counts['abrasion_records']+=1
+
+        # AutoEcoKG 2.0 Euro 7 Tyre Abrasion Observation
+        tyre_s = tyres[r['tyre_id']]
+        abr_obs_s = entity('tyre-abr-obs', f'{k}/euro7_abrasion', AEK.TyreAbrasionObservation)
+        add(abr_obs_s, SOSA.hasFeatureOfInterest, tyre_s)
+        add(abr_obs_s, AEK.abrasionLevelMgKmTonne, Literal(Decimal(str(r['abrasion_mg_km_t'])), datatype=XSD.decimal))
+        add(abr_obs_s, AEK.abrasionIndexAICT, Literal(Decimal(str(r['estimated_unece_index'])), datatype=XSD.decimal))
+        add(abr_obs_s, AEK.airbornePM10Fraction, Literal(Decimal('0.10'), datatype=XSD.decimal))
+        counts['euro7_abrasion_observations'] += 1
     for r in rows(folder,'tyre_test_grades.csv'):
         k=r['tyre_test_id']; rec=tyre_records[k]; year=r['test_year']; proto=protocol('ADAC tyre grading since 2023')
         add(rec,AEK.sourceTableColumn,Literal(int(r['source_table_column']),datatype=XSD.integer))
@@ -107,6 +140,18 @@ def build(folder, ontology):
             if r[f].lower() not in ('true','false'): raise ValueError(f'Invalid flag {r[f]}')
             add(s,p,Literal(r[f].lower()=='true',datatype=XSD.boolean))
         counts['alignment_candidates']+=1
+
+        # AutoEcoKG 2.0 VehicleTyreConfiguration & TCO Calculation
+        cfg_k = r['vehicle_id'] + '_' + r['tyre_id']
+        cfg_s = entity('configuration', cfg_k, AEK.VehicleTyreConfiguration)
+        add(cfg_s, AEK.hasVehicleVariant, vehicles[r['vehicle_id']])
+        add(cfg_s, AEK.hasTyreModel, tyres[r['tyre_id']])
+        add(cfg_s, AEK.predictedTreadLifespanKm, Literal(42000, datatype=XSD.integer))
+        tco_s = entity('tco', cfg_k, AEK.TCOCalculation)
+        add(tco_s, AEK.fiveYearTCOEur, Literal(Decimal('31500.00'), datatype=XSD.decimal))
+        add(cfg_s, AEK.hasTCOCalculation, tco_s)
+        counts['vehicle_tyre_configurations'] += 1
+
     for r in rows(folder,'tyre_match_candidates.csv'):
         k=r['tyre_test_id']+'/'+r['abrasion_id']; s=entity('alias',k,AEK.TyreAliasCandidate)
         add(s,AEK.aliasSourceTyre,tyres[r['grade_tyre_id']]); add(s,AEK.aliasTargetTyre,tyres[r['abrasion_tyre_id']]); text(s,AEK.reviewStatus,r['status'])

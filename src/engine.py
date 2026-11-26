@@ -74,6 +74,78 @@ SELECT ?name ?abrasion ?file ?page WHERE {
  aek:numericValue ?abrasion ; prov:wasDerivedFrom ?doc ; aek:sourcePage ?page .
  ?doc a aek:SourceDocument ; aek:sourceFilename ?file .
 } ORDER BY ?name ?abrasion
+""",
+"euro7_particulates": """
+SELECT ?vehicleName ?powertrain ?tyreName ?abrasionLevel ?aiCT ?brakePM10 ?brakeCompliant
+       (ROUND(?annualMicroplasticSoilWaterKg * 100) / 100.0 AS ?fleetSoilWaterMicroplasticsKgYr)
+       (ROUND(?annualAirbornePM10Grams * 10) / 10.0 AS ?fleetAirborneTyrePM10GramsYr)
+WHERE {
+  BIND(100 AS ?fleetSize)
+  BIND(25000 AS ?annualKmPerVehicle)
+
+  ?cfg a aek:VehicleTyreConfiguration ;
+       aek:hasVehicleVariant ?vehicle ;
+       aek:hasTyreModel ?tyre .
+
+  ?vehicle rdfs:label ?vehicleName ;
+           aek:powertrain ?powertrain ;
+           aek:massInRunningOrderKg ?massKg .
+  ?tyre rdfs:label ?tyreName .
+
+  ?abrObs a aek:TyreAbrasionObservation ;
+          sosa:hasFeatureOfInterest ?tyre ;
+          aek:abrasionLevelMgKmTonne ?abrasionLevel ;
+          aek:abrasionIndexAICT ?aiCT ;
+          aek:airbornePM10Fraction ?alphaPM10 .
+
+  ?brakeObs a aek:BrakeDustObservation ;
+            sosa:hasFeatureOfInterest ?vehicle ;
+            aek:brakePM10MgKm ?brakePM10 .
+
+  BIND(IF(?powertrain = "electric", 3.0, 7.0) AS ?euro7BrakeLimit)
+  BIND(?brakePM10 <= ?euro7BrakeLimit AS ?brakeCompliant)
+
+  BIND(?abrasionLevel * (?massKg / 1000.0) AS ?vehAbrasionMgKm)
+  BIND((?vehAbrasionMgKm * (1.0 - ?alphaPM10) * ?annualKmPerVehicle * ?fleetSize) / 1000000.0
+       AS ?annualMicroplasticSoilWaterKg)
+  BIND((?vehAbrasionMgKm * ?alphaPM10 * ?annualKmPerVehicle * ?fleetSize) / 1000.0
+       AS ?annualAirbornePM10Grams)
+} ORDER BY ?vehicleName ?tyreName
+""",
+"battery_durability": """
+SELECT ?vehicleName ?powertrain ?sohPercent ?milestoneYears ?milestoneKm ?euro7Compliant WHERE {
+  ?vehicle a aek:VehicleVariant ; rdfs:label ?vehicleName ; aek:powertrain ?powertrain .
+  ?obs a aek:BatteryDurabilityObservation ; sosa:hasFeatureOfInterest ?vehicle ;
+       aek:batterySoHPercent ?sohPercent ; aek:milestoneYears ?milestoneYears ;
+       aek:milestoneKm ?milestoneKm .
+  BIND(?sohPercent >= 80.0 AS ?euro7Compliant)
+} ORDER BY ?vehicleName
+""",
+"tco_pareto_skyline": """
+SELECT ?vehicleName ?tyreName ?lifespanKm ?tcoEur WHERE {
+  ?cfg a aek:VehicleTyreConfiguration ;
+       aek:hasVehicleVariant ?vehicle ;
+       aek:hasTyreModel ?tyre ;
+       aek:predictedTreadLifespanKm ?lifespanKm ;
+       aek:hasTCOCalculation ?tco .
+  ?tco aek:fiveYearTCOEur ?tcoEur .
+  ?vehicle rdfs:label ?vehicleName .
+  ?tyre rdfs:label ?tyreName .
+} ORDER BY ?tcoEur ?vehicleName
+""",
+"epistemic_divergence": """
+SELECT ?vehicleName ?powertrain ?wltp ?adac ?gap WHERE {
+  ?vehicle a aek:VehicleVariant ; rdfs:label ?vehicleName ; aek:powertrain ?powertrain .
+  {
+    ?w sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:wltp_fuel_l_100km ; aek:numericValue ?wltp .
+    ?a sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:adac_fuel_l_100km ; aek:numericValue ?adac .
+    ?g sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:fuel_l_100km_gap_pct ; aek:numericValue ?gap .
+  } UNION {
+    ?w sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:wltp_electric_kwh_100km ; aek:numericValue ?wltp .
+    ?a sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:adac_electric_kwh_100km ; aek:numericValue ?adac .
+    ?g sosa:hasFeatureOfInterest ?vehicle ; aek:measurementProperty aek:electric_kwh_100km_gap_pct ; aek:numericValue ?gap .
+  }
+} ORDER BY DESC(?gap) ?vehicleName
 """
 }
 

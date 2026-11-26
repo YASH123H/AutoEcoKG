@@ -1,0 +1,11 @@
+PREFIX aek: <https://w3id.org/autoecokg/ontology#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?vehicleName ?powertrain ?sohPercent ?milestoneYears ?milestoneKm ?euro7Compliant WHERE {
+  ?vehicle a aek:VehicleVariant ; rdfs:label ?vehicleName ; aek:powertrain ?powertrain .
+  ?obs a aek:BatteryDurabilityObservation ; sosa:hasFeatureOfInterest ?vehicle ;
+       aek:batterySoHPercent ?sohPercent ; aek:milestoneYears ?milestoneYears ;
+       aek:milestoneKm ?milestoneKm .
+  BIND(?sohPercent >= 80.0 AS ?euro7Compliant)
+} ORDER BY ?vehicleName

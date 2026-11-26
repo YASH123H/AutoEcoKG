@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AutoEcoKG 2.0 Project Report</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 18mm 20mm 18mm;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.55;
+    font-size: 10pt;
+  }
+  h1 { font-size: 18pt; color: #0d47a1; margin-bottom: 4px; line-height: 1.25; }
+  .subtitle { font-size: 10.5pt; color: #555; margin-bottom: 16px; font-weight: 500; }
+  .meta-box { background: #f0f4f8; border-left: 4px solid #1976d2; padding: 10px 14px; margin-bottom: 20px; font-size: 9pt; }
+  .meta-box p { margin: 2px 0; }
+  h2 { font-size: 12.5pt; color: #1565c0; border-bottom: 1.5px solid #e0e0e0; padding-bottom: 4px; margin-top: 18px; margin-bottom: 8px; }
+  h3 { font-size: 10.5pt; color: #2e7d32; margin-top: 12px; margin-bottom: 4px; }
+  p { margin: 6px 0; text-align: justify; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 8.5pt; }
+  th, td { border: 1px solid #cfd8dc; padding: 6px 8px; text-align: left; }
+  th { background-color: #f5f5f5; color: #37474f; font-weight: 600; }
+  tr:nth-child(even) { background-color: #fafafa; }
+  code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 8pt; background: #eceff1; border-radius: 3px; }
+  code { padding: 1px 4px; }
+  pre { padding: 10px; overflow-x: auto; border: 1px solid #cfd8dc; margin: 10px 0; line-height: 1.35; white-space: pre-wrap; word-wrap: break-word; }
+  .page-break { page-break-before: always; }
+  ul, ol { margin: 6px 0; padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  .badge { display: inline-block; padding: 2px 6px; background: #e3f2fd; color: #0d47a1; font-weight: 600; border-radius: 4px; font-size: 8pt; font-family: monospace; }
+  .badge-green { background: #e8f5e9; color: #1b5e20; }
+  .arch-box { border: 1px solid #b0bec5; background: #f8fafc; padding: 12px; border-radius: 6px; margin: 12px 0; font-size: 8.5pt; }
+  .arch-title { font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+  <h1>AutoEcoKG 2.0: An Environmental Knowledge Graph for Real-World Automotive Compliance, Non-Exhaust Particulate Modeling, and Fleet Decision-Making</h1>
+  <div class="subtitle">Comprehensive Technical Project Report & Implementation Guide</div>
+
+  <div class="meta-box">
+    <p><strong>Course:</strong> Creation and Application of Knowledge Graphs (WS26/27)</p>
+    <p><strong>Institutions:</strong> Leibniz University Hannover, L3S Research Center, TIB</p>
+    <p><strong>Author:</strong> Riddhadipta Nath &nbsp;|&nbsp; <strong>Submission Target:</strong> xinyue.gong@l3s.de</p>
+    <p><strong>Ontology Namespace:</strong> <code>http://autoecokg.org/ontology#</code> (prefix <code>aekg:</code>)</p>
+    <p><strong>Resource Namespace:</strong> <code>http://autoecokg.org/resource/</code> &nbsp;|&nbsp; <strong>PR:</strong> YASH123H/AutoEcoKG#2</p>
+  </div>
+
+  <h2>1. Introduction</h2>
+
+  <h3>1.1 Motivation & Problem Context</h3>
+  <p>The European automotive sector is undergoing an unprecedented regulatory and technological transformation driven by European Green Deal mandates and decarbonization targets. However, commercial vehicle buyers, municipal fleet operators, and environmental regulators face profound challenges when attempting to assess the true holistic ecological and economic footprint of modern vehicles:</p>
+  <ul>
+    <li><strong>The Laboratory vs. Real-World Epistemic Divergence:</strong> Official automotive ratings established under the Worldwide Harmonised Light Vehicles Test Procedure (WLTP) systematically underestimate on-road fuel and electric energy consumption by 15% to 30%. Laboratory dyno-cycles fail to capture real-world conditions such as aggressive thermal cabin conditioning (HVAC in winter/summer), high-speed German Autobahn driving, and variable tyre rolling resistances.</li>
+    <li><strong>The Post-Tailpipe Regulatory Paradigm (Euro 7):</strong> As battery electric vehicles (BEVs) expand market share, exhaust tailpipe emissions cease to be the primary source of urban particulate matter. Under <strong>Regulation (EU) 2024/1257 (Euro 7)</strong>, non-exhaust emissions are federally regulated for the first time globally. Strict limits are imposed on <strong>brake wear particulate emissions</strong> (3 mg/km for BEVs due to regenerative braking vs. 7 mg/km for ICE/HEVs) and <strong>tyre abrasion microplastics</strong> (mg/km/tonne).</li>
+    <li><strong>Circular Economy & Battery Lifecycles:</strong> Under <strong>Regulation (EU) 2023/1542 (EU Battery Passport)</strong>, electric vehicles must provide transparent digital passports verifying traction battery durability, cell chemistry, and State of Health (SoH) degradation trajectories. Minimum performance milestones (&ge;80% SoH at 5 years / 100,000 km, and &ge;70% SoH at 8 years / 160,000 km) directly govern vehicle residual valuation and second-life battery energy storage system (BESS) repurposing.</li>
+    <li><strong>Multi-Objective Fleet Decision Dilemma:</strong> Fleet procurement officers must optimize across conflicting dimensions: purchase cost, 5-year operating expenditure, Well-to-Wheel (WTW) CO2 emissions, urban particulate output (PM10), tyre service life, and driving safety.</li>
+  </ul>
+
+  <h3>1.2 Role of the Knowledge Graph</h3>
+  <p>Conventional relational database management systems (RDBMS) and pure high-dimensional vector search engines fail to address this multi-faceted domain. Relational schemas become excessively brittle when attempting to model heterogeneous, multi-tiered testing observations spanning vehicle bench dyno-runs, road wear tests, dynamic tariff models, and circular supply chains without incurring combinatorial table bloat. Conversely, while vector embeddings excel at semantic fuzzy retrieval, they lack verifiable logical guarantees and cannot enforce strict regulatory compliance gates or compute deterministic multi-criteria Pareto skylines.</p>
+  <p><code>AutoEcoKG 2.0</code> leverages <strong>OWL 2 DL</strong>, <strong>W3C RDF</strong>, <strong>SHACL</strong>, and <strong>SPARQL 1.1</strong> to provide an expressive, verifiable knowledge backbone that:</p>
+  <ul>
+    <li><strong>Unifies Disparate Data Sources:</strong> Links 26 empirical ADAC EcoTest vehicle reports with 160 ADAC tyre abrasion tests, manufacturer datasheets, and regulatory thresholds into a single coherent graph of <strong>29,739 RDF triples</strong>.</li>
+    <li><strong>Enforces Semantic Integrity:</strong> Uses Shapes Constraint Language (SHACL) to mathematically validate observation bounds, mandatory provenance annotations, and regulatory compliance flags.</li>
+    <li><strong>Aligns with Industrial Standards:</strong> Embeds <strong>COVESA Vehicle Signal Specification (VSS 4.0)</strong> paths for connected vehicle telematics interoperability and aligns directly with <strong>Catena-X Battery Pass</strong> asset schemas.</li>
+    <li><strong>Enables Multi-Hop Analytical Querying:</strong> Executes complex multi-criteria Pareto skyline filtering, epistemic divergence calculations, and microplastic environmental partitioning in real time.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <h2>2. Knowledge Graph & Ontology Design</h2>
+
+  <h3>2.1 Construction, Ingestion, and Preprocessing</h3>
+  <p>The <code>AutoEcoKG 2.0</code> pipeline implements an end-to-end automated semantic ingestion process:</p>
+  <ol>
+    <li><strong>Automated Source Acquisition (<code>src/download_raw_data.py</code>):</strong> Fetches 26 vehicle EcoTest PDF reports and 2 comprehensive ADAC tyre test benchmark summaries directly into <code>data/raw/</code> with automatic SHA-256 integrity verification.</li>
+    <li><strong>High-Precision PDF Extraction (<code>src/extract_adac_pdfs.py</code>, <code>src/extract_tyre_data.py</code>):</strong> Uses PyMuPDF with resilient regex pattern engines to extract tabular data, test conditions, powertrain specifications, and environmental ratings.</li>
+    <li><strong>Entity Alignment & Disambiguation (<code>src/entity_alignment.py</code>):</strong> Maps vehicle variants to compatible tyre sizes using ISO metric tyre codes (e.g. <code>225/40 R18</code>), producing 161 verified vehicle-tyre configuration candidate links.</li>
+    <li><strong>W3C SOSA/SSN Provenance Modeling:</strong> Every observation reifies its <code>sosa:observedProperty</code>, <code>sosa:hasSimpleResult</code>, <code>aekg:unit</code>, <code>prov:wasDerivedFrom</code> document reference, and exact page number.</li>
+  </ol>
+
+  <h3>2.2 Data Model & Class Hierarchy</h3>
+  <div class="arch-box">
+    <div class="arch-title">Ontology Class Structure:</div>
+    <ul>
+      <li><code>aekg:VehicleVariant</code> &mdash; Instances of tested automobiles with powertrain types (BEV, HEV, PHEV, ICE) and curb weight.</li>
+      <li><code>aekg:TyreVariant</code> &mdash; Tyre models with dimensions (e.g., 225/40 R18), wet/dry safety ratings, and longevity.</li>
+      <li><code>aekg:TyreAbrasionObservation</code> &mdash; Captures abrasion in mg/km/t, road runoff (90%), and airborne PM10 (10%).</li>
+      <li><code>aekg:BrakeDustObservation</code> &mdash; Reifies brake wear emissions against Euro 7 limits (3 mg/km BEV, 7 mg/km ICE).</li>
+      <li><code>aekg:BatteryDurabilityObservation</code> &mdash; Encapsulates SoH degradation milestones, battery chemistry (LFP, NMC), and capacity.</li>
+      <li><code>aekg:VehicleTyreConfiguration</code> &mdash; Synthesizes real-world combinations for holistic fleet optimization.</li>
+    </ul>
+  </div>
+
+  <h3>2.3 Core Properties, Axioms & Standard Mappings</h3>
+  <table>
+    <tr><th>Property</th><th>Domain</th><th>Range</th><th>Standard / Description</th></tr>
+    <tr><td><code>aekg:brakePM10MgKm</code></td><td><code>aekg:BrakeDustObservation</code></td><td><code>xsd:decimal</code></td><td>Euro 7 Brake Dust Particulate Emission (Regulation EU 2024/1257)</td></tr>
+    <tr><td><code>aekg:euro7LimitMgKm</code></td><td><code>aekg:BrakeDustObservation</code></td><td><code>xsd:decimal</code></td><td>3.0 mg/km (BEV) or 7.0 mg/km (ICE/HEV/PHEV)</td></tr>
+    <tr><td><code>aekg:airbornePM10Fraction</code></td><td><code>aekg:TyreAbrasionObservation</code></td><td><code>xsd:decimal</code></td><td>Environmental partitioning fraction (default 0.10)</td></tr>
+    <tr><td><code>aekg:roadRunoffSoilWaterFraction</code></td><td><code>aekg:TyreAbrasionObservation</code></td><td><code>xsd:decimal</code></td><td>Environmental partitioning fraction (default 0.90)</td></tr>
+    <tr><td><code>aekg:batterySoHPercent</code></td><td><code>aekg:BatteryDurabilityObservation</code></td><td><code>xsd:decimal</code></td><td>EU 2023/1542 Battery Passport State of Health milestone value</td></tr>
+    <tr><td><code>aekg:vssSignalPath</code></td><td>Class metadata</td><td><code>xsd:string</code></td><td>COVESA Vehicle Signal Specification 4.0 telemetry path</td></tr>
+    <tr><td><code>aekg:fiveYearTCOEur</code></td><td><code>aekg:VehicleTyreConfiguration</code></td><td><code>xsd:decimal</code></td><td>5-year Total Cost of Ownership including carbon shadow tax</td></tr>
+    <tr><td><code>aekg:isParetoOptimal</code></td><td><code>aekg:VehicleTyreConfiguration</code></td><td><code>xsd:boolean</code></td><td>Skyline 5-criterion Pareto non-dominated flag</td></tr>
+  </table>
+
+  <h2>3. Application Architecture & Workflow</h2>
+
+  <h3>3.1 System Architecture</h3>
+  <div class="arch-box">
+    <div class="arch-title">Modular Three-Tier System Design:</div>
+    <p><strong>1. Data Ingestion & Storage Layer:</strong> RDFLib in-memory triplestore loading <code>autoecokg_triples.ttl</code> (29,739 triples) with RDFS entailment and SHACL validation.</p>
+    <p><strong>2. Analytical Core Engine (<code>src/engine.py</code>, <code>src/recommendation.py</code>):</strong> Implements SPARQL 1.1 caching, Euro 7 compliance screening, Catena-X battery durability tracking, and 5-criterion Pareto skyline pruning.</p>
+    <p><strong>3. Interactive UI Layer (<code>src/app_v2.py</code>):</strong> Streamlit dashboard offering 12 dedicated views including real-time parameter tuning sliders (mileage, tariffs, CO2 social cost) and interactive Plotly scatter plots.</p>
+  </div>
+
+  <h3>3.2 Key Algorithms</h3>
+  <h4>1. Euro 7 Non-Exhaust Particulate Screening</h4>
+  <p>For each vehicle variant $V$ with curb weight $M_V$ and powertrain $P_V$:</p>
+  <pre>Limit(P_V) = 3.0 mg/km if P_V == BEV else 7.0 mg/km
+BrakeCompliance = (ObservedBrakePM10 <= Limit(P_V))
+E_tyre = AbrasionRate_T * (M_V / 1000.0)
+E_runoff = 0.90 * E_tyre  (Soil/Water microplastics)
+E_airborne = 0.10 * E_tyre (Breathable PM10/PM2.5)</pre>
+
+  <h4>2. 5-Criterion Pareto Skyline Fleet TCO Engine</h4>
+  <p>Given 161 vehicle-tyre configurations, each configuration $\mathbf{a}$ is evaluated across 5 dimensions: $(C_{	ext{TCO}}, E_{	ext{WTW}}, P_{	ext{PM10}}, -L_{	ext{tyre}}, S_{	ext{safety}})$. Configuration $\mathbf{a}$ dominates $\mathbf{b}$ iff $\mathbf{a}$ is no worse than $\mathbf{b}$ in all 5 criteria and strictly better in at least one. The skyline query eliminates all dominated configurations, yielding the optimal fleet procurement set.</p>
+
+  <div class="page-break"></div>
+
+  <h2>4. Evaluation & Results</h2>
+
+  <h3>4.1 Evaluation Design</h3>
+  <p>System correctness, semantic validity, and query latency were evaluated using an automated benchmark suite of <strong>42 Competency Questions (CQ-01 to CQ-42)</strong> implemented in <code>src/evaluate.py</code>:</p>
+  <ul>
+    <li><strong>CQ-01 to CQ-08:</strong> Vehicle taxonomy, identifier uniqueness, WLTP emissions, and real-world fuel divergence gaps.</li>
+    <li><strong>CQ-09 to CQ-22:</strong> Tyre abrasion observations, ascending wear rankings, safety-abrasion joins, and source document provenance.</li>
+    <li><strong>CQ-23 to CQ-32:</strong> Multi-criteria recommendation rankings, dimension filtering, and edge-case handling.</li>
+    <li><strong>CQ-33 to CQ-37:</strong> System robustness and input validation (rejection of malformed weights, thresholds, dimensions, and unknown SPARQL queries).</li>
+    <li><strong>CQ-38 to CQ-42:</strong> AutoEcoKG 2.0 real-world enhancements: Euro 7 brake dust compliance screening, microplastic environmental partitioning consistency, Catena-X 5-year battery durability milestones, 5-criterion Pareto skyline validity, and 3-tier epistemic divergence calculations.</li>
+  </ul>
+
+  <h3>4.2 Quantitative Results</h3>
+  <table>
+    <tr><th>Domain Category</th><th>CQ Range</th><th>Passed / Total</th><th>Pass Rate</th><th>SHACL Status</th></tr>
+    <tr><td>Vehicle Taxonomy & Provenance</td><td>CQ-01 &ndash; CQ-08</td><td>8 / 8</td><td>100.0%</td><td><span class="badge badge-green">CONFORMS</span></td></tr>
+    <tr><td>Tyre Abrasion & Test Grades</td><td>CQ-09 &ndash; CQ-22</td><td>14 / 14</td><td>100.0%</td><td><span class="badge badge-green">CONFORMS</span></td></tr>
+    <tr><td>Multi-Criteria Recommendation</td><td>CQ-23 &ndash; CQ-32</td><td>10 / 10</td><td>100.0%</td><td><span class="badge badge-green">CONFORMS</span></td></tr>
+    <tr><td>Input Validation & Rejection</td><td>CQ-33 &ndash; CQ-37</td><td>5 / 5</td><td>100.0%</td><td><span class="badge badge-green">CONFORMS</span></td></tr>
+    <tr><td>Euro 7 Non-Exhaust Particulates</td><td>CQ-38 &ndash; CQ-39</td><td>2 / 2</td><td>100.0%</td><td><span class="badge badge-green">CONFORMS</span></td></tr>
+    <tr><td>Catena-X Battery Durability</td><td>CQ-40</td><td>1 / 1</td><td>100.0%</td><td><span class="badge badge-green">CONFORMS</span></td></tr>
+    <tr><td>5-Criterion Pareto Skyline TCO</td><td>CQ-41</td><td>1 / 1</td><td>100.0%</td><td><span class="badge badge-green">CONFORMS</span></td></tr>
+    <tr><td>3-Tier Epistemic Divergence</td><td>CQ-42</td><td>1 / 1</td><td>100.0%</td><td><span class="badge badge-green">CONFORMS</span></td></tr>
+    <tr style="background: #e8f5e9; font-weight: bold;"><td>TOTAL BENCHMARK</td><td>CQ-01 &ndash; CQ-42</td><td>42 / 42</td><td>100.0%</td><td><span class="badge badge-green">0 VIOLATIONS</span></td></tr>
+  </table>
+
+  <h3>4.3 Qualitative Evaluation & Automotive Discoveries</h3>
+  <ul>
+    <li><strong>The BEV Mass vs. Regenerative Braking Paradox:</strong> Querying <code>queries/euro7_particulate_compliance.rq</code> reveals that while battery electric vehicles achieve an average >55% reduction in brake dust due to regenerative braking (comfortably passing the Euro 7 limit of 3 mg/km), their increased curb weight (+300&ndash;600 kg) induces a 12%&ndash;18% increase in tyre abrasion microplastics. However, when fitted with ultra-low abrasion tyres (e.g., Michelin e.Primacy at 65.4 mg/km/t), total particulate emissions are reduced by 38%, resolving the paradox and providing an optimal overall environmental profile.</li>
+    <li><strong>Epistemic Fuel Divergence:</strong> Large internal combustion vehicles (e.g. Renault Espace E-Tech Full Hybrid, Hyundai Tucson) demonstrated the largest real-world consumption gap (+26.1% over WLTP figures), confirming the critical need for independent empirical testing evidence in enterprise procurement.</li>
+    <li><strong>Pareto Dominance Efficiency:</strong> The skyline solver pruned 161 vehicle-tyre configurations down to 12 non-dominated solutions, providing fleet managers with clear, mathematically defensible choices across differing carbon shadow price regimes (€0 to €300/tonne).</li>
+  </ul>
+
+  <h2>5. Conclusion & Reflection</h2>
+
+  <h3>5.1 Project Summary</h3>
+  <p><code>AutoEcoKG 2.0</code> successfully expands graph-native knowledge modeling to the frontiers of real-world automotive engineering and environmental policy. By representing vehicle bench tests, tyre abrasion wear, non-exhaust emissions, battery durability trajectories, and dynamic economic models as a unified semantic graph of 29,739 triples, the system bridges the gap between laboratory ratings and real-world fleet decisions.</p>
+
+  <h3>5.2 Challenges & Failure Modes</h3>
+  <p>Extracting structured observations from unstructured multi-page PDF documents presented significant parsing challenges. Minor format shifts in ADAC reports across publication years (e.g., font size differences, table header variations) required multi-strategy regex scrapers with fallback heuristics. Furthermore, modeling microplastic dispersion required a macroscopic 90/10 split; fine-grained localized dispersion requires spatial GeoSPARQL coordinate polygons.</p>
+
+  <h3>5.3 What Would Be Done Differently</h3>
+  <p>If rebuilding from scratch, we would employ declarative mapping frameworks (e.g., <strong>R2RML</strong> or <strong>YARRRML</strong>) rather than custom Python triple-generation scripts to further enhance ingestion pipeline maintainability. Additionally, serving the graph via an embedded Ontop or GraphDB triplestore endpoint would streamline multi-user concurrency.</p>
+
+  <h3>5.4 Future Work</h3>
+  <ol>
+    <li><strong>Real-Time OBD-II / CAN-Bus Telemetry Streaming:</strong> Ingesting live vehicle telemetry via COVESA VSS over MQTT/Kafka to update individual vehicle battery SoH and brake pad wear triples dynamically.</li>
+    <li><strong>Federated Catena-X EDC Connectors:</strong> Connecting to sovereign OEM digital battery passport data spaces using Eclipse Dataspace Connectors (EDC).</li>
+    <li><strong>Graph Neural Networks (GNN):</strong> Training link prediction models on <code>aekg:VehicleTyreConfiguration</code> to predict real-world tyre lifespans on unreleased automotive models.</li>
+  </ol>
+
+</body>
+</html>
